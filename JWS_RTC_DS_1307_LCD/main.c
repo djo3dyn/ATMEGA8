@@ -1,7 +1,7 @@
 /* Aplikasi Jadwal Waktu Sholat
  * ATMEGA8 
  
- * by Judin (c) 2019
+ * by Judin
  
  *judincahsigerung@gmail.com
 
@@ -36,19 +36,19 @@ uint8_t height = 0;
 
 // Initializations Waktu Sholat
 uint8_t dzuhur_h = 12;
-uint8_t dzuhur_m = 1;
+uint8_t dzuhur_m = 0;
 uint8_t ashar_h = 15;
-uint8_t ashar_m = 23;
+uint8_t ashar_m = 10;
 uint8_t maghrib_h = 17;
-uint8_t maghrib_m = 55;
+uint8_t maghrib_m = 48;
 uint8_t isya_h = 19;
-uint8_t isya_m = 8;
+uint8_t isya_m = 2;
 uint8_t imsyak_h = 4;
-uint8_t imsyak_m = 34;
+uint8_t imsyak_m = 30;
 uint8_t subuh_h = 4;
-uint8_t subuh_m = 44;
-uint8_t terbit_h = 6;
-uint8_t terbit_m = 5;
+uint8_t subuh_m = 40;
+uint8_t terbit_h = 5;
+uint8_t terbit_m = 58;
 
 
 // Functions....
