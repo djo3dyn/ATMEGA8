@@ -4,36 +4,13 @@
 
 #include "ds1307.h"
 
+#define COM_ANODA 0
+#include "segment.h"
+
 #define SCAN PORTD
 #define DATA PORTB
- 
-
-#define NONE    0b00000000
-#define ZERO    0b00111111
-#define ONE     0b00000110
-#define TWO     0b01011011 
-#define THREE   0b01001111
-#define FOUR    0b01100110
-#define FIVE    0b01101101
-#define SIX     0b01111101
-#define SEVEN   0b00000111
-#define EIGHT   0b01111111
-#define NINE    0b01101111
-#define CHR_A   0b01110111
-#define CHR_B   0b01111100
-#define CHR_C   0b00111001
-#define CHR_D   0b01011110
-#define CHR_E   0b01111001
-#define CHR_F   0b01110001
 
 
-//Define step timer
-
-#define STEP1 100
-#define STEP2 200
-#define STEP3 600
-#define STEP4 800
-#define STEP5 1000
 
 uint8_t segment[16] = {	ZERO,ONE,TWO,THREE,FOUR,
 						FIVE,SIX,SEVEN,EIGHT,
@@ -159,7 +136,6 @@ void update_time()
 ISR (TIMER1_COMPA_vect)
 {
     scan_segment(); 
-	//PORTC ^= _BV(PC0);
 }
 	
 int main()
