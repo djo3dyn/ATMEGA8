@@ -4,21 +4,26 @@
 
 #include "ds1307.h"
 
-#define COM_ANODA 0
 #include "segment.h"
 
 #define SCAN PORTD
 #define DATA PORTB
 
+#define RUN_MODE 0
+#define SET_MODE 1
 
+uint8_t op_mode = 0 ;
+uint8_t flash , flash_en ;
+uint8_t digit_flash = 0 ;
+uint64_t two_millis , button_millis ; 
 
-uint8_t segment[16] = {	ZERO,ONE,TWO,THREE,FOUR,
+uint8_t segment[17] = {	ZERO,ONE,TWO,THREE,FOUR,
 						FIVE,SIX,SEVEN,EIGHT,
 						NINE,CHR_A,CHR_B,CHR_C,
-						CHR_D,CHR_E,CHR_F };
+						CHR_D,CHR_E,CHR_F ,NONE};
 
 volatile uint8_t digit[8] = {0,0,0,0, 0,0,0,0};					
-volatile uint8_t data_digit[8] = {0,0,0,0, 0,0,0,0};
+volatile uint8_t data_digit[8] = {0,0,0,0, 0,0,0,0};  //main scan data
 volatile uint8_t digit_count = 6 ;
 
 uint8_t year = 0;
@@ -37,10 +42,10 @@ void init()
 	DDRB = 0xFF; // Output Positif -- Data
 	DDRD = 0xFF; // Output Negatif -- Scan
 	
-	DDRC = 0x01 ;// Add second colon/dot
+	DDRC = 0b00001001 ;// Add second colon/dot
 	PORTC |= _BV(PC1) | _BV(PC2) ; //Input Pullup for button
 
-	//Timer Interrupt
+	//Timer Interrupt for scan - High speed
 	TCCR1B |= _BV(WGM12); // Mode 4, CTC on OCR1A
     TIMSK |= _BV(OCIE1A); //Set interrupt on compare match 
 
@@ -49,6 +54,10 @@ void init()
 	_delay_ms(500);
 	SCAN |= ~_BV(PD0); // initial value scan
 	DATA = 0x00 ;
+
+	// Timer interupt for flash - Low speed
+	TIMSK |= _BV(TOIE0) ; //Enable Timer0 overflow interrupt
+	TCCR0 |= _BV(CS01)|_BV(CS00); // set prescaler to 64 (CLK=8000000Hz/64/256=488Hz, 2ms)
 	
 }
 
@@ -69,6 +78,15 @@ void stop_scan()
 	//Disable Global Interrupt
 	cli(); 
 }
+
+/*
+void start_flash(int _stat)
+{
+	if (_stat) TCCR0 |= _BV(CS02)|_BV(CS00); // set prescaler to 1024 (CLK=8000000Hz/1024/256=30Hz, 0.03s)
+	else TCCR0 &= ~_BV(CS02) & ~_BV(CS01) & ~_BV(CS00) ; // set prescaler to 0 and stop the timer
+	
+}
+*/
 
 void scan_segment()  //scan rate in us
 {
@@ -123,10 +141,15 @@ void generate_digit(unsigned int _numL , unsigned int _numH)
 	
 }
 
+void flash_digit(unsigned int _digit , unsigned int on_off)
+{
+	if (on_off) data_digit[_digit] = segment[digit[_digit]];
+	else data_digit[_digit] = segment[16];
+}
+
 void update_time()
 {
 	unsigned int sec_min = 0 ;
-
 	//RTC get date
 	ds1307_getdate(&year, &month, &day, &hour, &minute, &second);
 	sec_min = (minute *100) + second ;
@@ -137,6 +160,35 @@ ISR (TIMER1_COMPA_vect)
 {
     scan_segment(); 
 }
+
+ISR(TIMER0_OVF_vect) // always ON
+{
+	two_millis++; // Count overflow
+	if(two_millis >= 250 ) //every ~0,5 sec
+	{
+		PORTC ^= _BV(PC3); //Test toogle LED
+		if (flash_en)
+		{
+			flash ^= 1 ;
+			flash_digit(digit_flash , flash);
+		}
+		if (!(PINC&_BV(PC1)))
+		{
+			button_millis++;
+			if (button_millis>=6)
+			{
+				op_mode ^= 1 ;
+				flash_en ^= 1 ;
+				button_millis = 0 ;
+			}
+		}
+		else
+		{
+			button_millis = 0 ; 
+		}
+		two_millis = 0; //reset milis
+	}
+}
 	
 int main()
 {
@@ -146,9 +198,17 @@ int main()
 
 	while(1)
 	{
-		update_time();
-		PORTC ^= _BV(PC0);
-		_delay_ms(500);
-
+		if (op_mode==RUN_MODE)
+		{
+			update_time();
+			PORTC ^= _BV(PC0);
+			_delay_ms(500);
+		}
+		else if (op_mode==SET_MODE)
+		{
+			
+	
+		}
+	
 	}
 }
