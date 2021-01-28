@@ -4,6 +4,7 @@
 
 #include "ds1307.h"
 
+<<<<<<< HEAD
 #include "segment.h"
 
 #define SCAN PORTD
@@ -24,6 +25,46 @@ uint8_t segment[17] = {	ZERO,ONE,TWO,THREE,FOUR,
 
 volatile uint8_t digit[8] = {0,0,0,0, 0,0,0,0};					
 volatile uint8_t data_digit[8] = {0,0,0,0, 0,0,0,0};  //main scan data
+=======
+#define SCAN PORTD
+#define DATA PORTB
+ 
+
+#define NONE    0b00000000
+#define ZERO    0b00111111
+#define ONE     0b00000110
+#define TWO     0b01011011 
+#define THREE   0b01001111
+#define FOUR    0b01100110
+#define FIVE    0b01101101
+#define SIX     0b01111101
+#define SEVEN   0b00000111
+#define EIGHT   0b01111111
+#define NINE    0b01101111
+#define CHR_A   0b01110111
+#define CHR_B   0b01111100
+#define CHR_C   0b00111001
+#define CHR_D   0b01011110
+#define CHR_E   0b01111001
+#define CHR_F   0b01110001
+
+
+//Define step timer
+
+#define STEP1 100
+#define STEP2 200
+#define STEP3 600
+#define STEP4 800
+#define STEP5 1000
+
+uint8_t segment[16] = {	ZERO,ONE,TWO,THREE,FOUR,
+						FIVE,SIX,SEVEN,EIGHT,
+						NINE,CHR_A,CHR_B,CHR_C,
+						CHR_D,CHR_E,CHR_F };
+
+volatile uint8_t digit[8] = {0,0,0,0, 0,0,0,0};					
+volatile uint8_t data_digit[8] = {0,0,0,0, 0,0,0,0};
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 volatile uint8_t digit_count = 6 ;
 
 uint8_t year = 0;
@@ -42,10 +83,17 @@ void init()
 	DDRB = 0xFF; // Output Positif -- Data
 	DDRD = 0xFF; // Output Negatif -- Scan
 	
+<<<<<<< HEAD
 	DDRC = 0b00001001 ;// Add second colon/dot
 	PORTC |= _BV(PC1) | _BV(PC2) ; //Input Pullup for button
 
 	//Timer Interrupt for scan - High speed
+=======
+	DDRC = 0x01 ;// Add second colon/dot
+	PORTC |= _BV(PC1) | _BV(PC2) ; //Input Pullup for button
+
+	//Timer Interrupt
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 	TCCR1B |= _BV(WGM12); // Mode 4, CTC on OCR1A
     TIMSK |= _BV(OCIE1A); //Set interrupt on compare match 
 
@@ -54,10 +102,13 @@ void init()
 	_delay_ms(500);
 	SCAN |= ~_BV(PD0); // initial value scan
 	DATA = 0x00 ;
+<<<<<<< HEAD
 
 	// Timer interupt for flash - Low speed
 	TIMSK |= _BV(TOIE0) ; //Enable Timer0 overflow interrupt
 	TCCR0 |= _BV(CS01)|_BV(CS00); // set prescaler to 64 (CLK=8000000Hz/64/256=488Hz, 2ms)
+=======
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 	
 }
 
@@ -79,6 +130,7 @@ void stop_scan()
 	cli(); 
 }
 
+<<<<<<< HEAD
 /*
 void start_flash(int _stat)
 {
@@ -88,6 +140,8 @@ void start_flash(int _stat)
 }
 */
 
+=======
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 void scan_segment()  //scan rate in us
 {
 	volatile uint8_t buff = 1 ;
@@ -141,6 +195,7 @@ void generate_digit(unsigned int _numL , unsigned int _numH)
 	
 }
 
+<<<<<<< HEAD
 void flash_digit(unsigned int _digit , unsigned int on_off)
 {
 	if (on_off) data_digit[_digit] = segment[digit[_digit]];
@@ -150,6 +205,12 @@ void flash_digit(unsigned int _digit , unsigned int on_off)
 void update_time()
 {
 	unsigned int sec_min = 0 ;
+=======
+void update_time()
+{
+	unsigned int sec_min = 0 ;
+
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 	//RTC get date
 	ds1307_getdate(&year, &month, &day, &hour, &minute, &second);
 	sec_min = (minute *100) + second ;
@@ -159,6 +220,7 @@ void update_time()
 ISR (TIMER1_COMPA_vect)
 {
     scan_segment(); 
+<<<<<<< HEAD
 }
 
 ISR(TIMER0_OVF_vect) // always ON
@@ -188,6 +250,9 @@ ISR(TIMER0_OVF_vect) // always ON
 		}
 		two_millis = 0; //reset milis
 	}
+=======
+	//PORTC ^= _BV(PC0);
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 }
 	
 int main()
@@ -198,6 +263,7 @@ int main()
 
 	while(1)
 	{
+<<<<<<< HEAD
 		if (op_mode==RUN_MODE)
 		{
 			update_time();
@@ -210,5 +276,11 @@ int main()
 	
 		}
 	
+=======
+		update_time();
+		PORTC ^= _BV(PC0);
+		_delay_ms(500);
+
+>>>>>>> 069d63ec83c3dc1dae89cf2f842bda93b21da030
 	}
 }
