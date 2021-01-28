@@ -1,6 +1,7 @@
 /* Serial UART to TWI master transmitter ;
  * Input UART Frame [Start_Code] [Data_Size] [Slave_addrees] [data_1] ...[data_n] ; max 16 byte
  * 
+ * (c) 2021 judincahsigerung@gmail.com
 */
 
 #include <avr/io.h>
