@@ -137,11 +137,7 @@ void UART_init(uint16_t baudrate)
 	UCSRB = _BV(TXEN) | _BV(RXEN) | _BV(RXCIE);
 	/* Set format 8N1 */
 	UCSRC = _BV(URSEL) | _BV(UCSZ1) | _BV(UCSZ0);
-  // Timeout Setup
-  TCCR0 |= _BV(CS00); // set prescaler to 1 (CLK=8000000Hz/1/256=15kHz, 0.25ms)
-	TIMSK |= _BV(TOIE0); // enable Timer Overflow interrupt
-	// enable global interupt
-	sei();
+  
 }
 
 void UART_putc(char c)
